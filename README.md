@@ -21,3 +21,8 @@ datasets:
 	*  `demo2_1DBump.m` - Tutorial script illustrating P-GPLVM for 1-dimensional latent variable with tuning curves generated from 1D Gaussian bumps.
 	* `demo3_2DBump.m` - Tutorial script illustrating P-GPLVM for 2-dimensional latent variable with tuning curves generated from 2D Gaussian bumps.
 
+Update
+=====
+`demo_*_ref.m` are the new demos with a `reference` implementation. The new implementation works for multi-trial data with aligned time points.
+
+

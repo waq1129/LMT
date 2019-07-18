@@ -2,14 +2,14 @@ function v = logdetns(A, op)
 %LOGDET Computation of logarithm of determinant of a matrix
 %
 %   v = logdet(A);
-%       computes the logarithm of determinant of A. 
+%       computes the logarithm of determinant of A.
 %
 %       Here, A should be a square matrix of double or single class.
 %       If A is singular, it will returns -inf.
 %
-%       Theoretically, this function should be functionally 
-%       equivalent to log(det(A)). However, it avoids the 
-%       overflow/underflow problems that are likely to 
+%       Theoretically, this function should be functionally
+%       equivalent to log(det(A)). However, it avoids the
+%       overflow/underflow problems that are likely to
 %       happen when applying det to large matrices.
 %
 %       The key idea is based on the mathematical fact that
@@ -17,32 +17,32 @@ function v = logdetns(A, op)
 %       product of its diagonal elements. Hence, the matrix's
 %       log-determinant is equal to the sum of their logarithm
 %       values. By keeping all computations in log-scale, the
-%       problem of underflow/overflow caused by product of 
+%       problem of underflow/overflow caused by product of
 %       many numbers can be effectively circumvented.
 %
 %       The implementation is based on LU factorization.
 %
 %   v = logdet(A, 'chol');
-%       If A is positive definite, you can tell the function 
-%       to use Cholesky factorization to accomplish the task 
+%       If A is positive definite, you can tell the function
+%       to use Cholesky factorization to accomplish the task
 %       using this syntax, which is substantially more efficient
-%       for positive definite matrix. 
+%       for positive definite matrix.
 %
 %   Remarks
 %   -------
-%       logarithm of determinant of a matrix widely occurs in the 
-%       context of multivariate statistics. The log-pdf, entropy, 
-%       and divergence of Gaussian distribution typically comprises 
-%       a term in form of log-determinant. This function might be 
-%       useful there, especially in a high-dimensional space.       
+%       logarithm of determinant of a matrix widely occurs in the
+%       context of multivariate statistics. The log-pdf, entropy,
+%       and divergence of Gaussian distribution typically comprises
+%       a term in form of log-determinant. This function might be
+%       useful there, especially in a high-dimensional space.
 %
-%       Theoretially, LU, QR can both do the job. However, LU 
+%       Theoretially, LU, QR can both do the job. However, LU
 %       factorization is substantially faster. So, for generic
-%       matrix, LU factorization is adopted. 
+%       matrix, LU factorization is adopted.
 %
 %       For positive definite matrices, such as covariance matrices,
 %       Cholesky factorization is typically more efficient. And it
-%       is STRONGLY RECOMMENDED that you use the chol (2nd syntax above) 
+%       is STRONGLY RECOMMENDED that you use the chol (2nd syntax above)
 %       when you are sure that you are dealing with a positive definite
 %       matrix.
 %
@@ -61,7 +61,7 @@ function v = logdetns(A, op)
 %   Copyright 2008, Dahua Lin, MIT
 %   Email: dhlin@mit.edu
 %
-%   This file can be freely modified or distributed for any kind of 
+%   This file can be freely modified or distributed for any kind of
 %   purposes.
 %
 
@@ -88,5 +88,9 @@ else
     [L, U, P] = lu(A);
     du = diag(U);
     c = det(P) * prod(sign(du));
-    v = log(c) + sum(log(abs(du)));
+    if c<0
+        v = sum(log(abs(du)));
+    else
+        v = log(c) + sum(log(abs(du)));
+    end
 end

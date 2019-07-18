@@ -1,0 +1,1 @@
+for i in `find $1 -type f | grep "eps$"`; do echo $i; pstopdf $i; rm $i; done

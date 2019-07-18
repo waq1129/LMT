@@ -27,28 +27,30 @@ sf2 = exp(2*loghyper(2));                                     % signal variance
 
 A = sf2*exp(-sq_dist(x'/ell,z'/ell)/2);
 
-nx = size(x,1);
-nz = size(z,1);
-
-x1 = vec(x);
-x2 = repmat(x1,1,nz)';
-x3 = reshape(x2,[nz,nx,D]);
-x4 = permute(x3,[1,3,2]);
-x5 = reshape(x4,nz,[]);
-x6 = reshape(x5,1,[]);
-x7 = reshape(x6',D*nz,[])';
-
-z1 = vec(z);
-z2 = repmat(z1,1,nx)';
-
-dd = x7-z2;
-dA = repmat(A,1,D).*dd/ell^2;
-
-
-bb = reshape(dA,[],D)';
-cc = reshape(bb,[D,nx,nz]);
-dd = permute(cc,[1,3,2]);
-ee = reshape(dd,D,[]);
-ff = reshape(ee,D*nz,[])';
-
-dA = ff;
+if nargout>1
+    nx = size(x,1);
+    nz = size(z,1);
+    
+    x1 = vec(x);
+    x2 = repmat(x1,1,nz)';
+    x3 = reshape(x2,[nz,nx,D]);
+    x4 = permute(x3,[1,3,2]);
+    x5 = reshape(x4,nz,[]);
+    x6 = reshape(x5,1,[]);
+    x7 = reshape(x6',D*nz,[])';
+    
+    z1 = vec(z);
+    z2 = repmat(z1,1,nx)';
+    
+    dd = x7-z2;
+    dA = repmat(A,1,D).*dd/ell^2;
+    
+    
+    bb = reshape(dA,[],D)';
+    cc = reshape(bb,[D,nx,nz]);
+    dd = permute(cc,[1,3,2]);
+    ee = reshape(dd,D,[]);
+    ff = reshape(ee,D*nz,[])';
+    
+    dA = ff;
+end

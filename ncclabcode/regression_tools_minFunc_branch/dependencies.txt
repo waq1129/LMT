@@ -1,0 +1,8 @@
+needs:
+
+logit.m
+logistic.m
+logdet.m
+fminNewton.m
+
+../nlfuns/
