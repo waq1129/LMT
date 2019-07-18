@@ -1,0 +1,231 @@
+\documentclass[10pt,english]{article}
+%\special{papersize=210mm,297mm}
+\usepackage[a4paper,left=20mm,right=20mm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage{epsfig}
+\usepackage{babel}
+\usepackage{amssymb}
+\usepackage{amsmath}
+%\usepackage{amsthm}
+\usepackage{units}
+\usepackage[authoryear,round,comma]{natbib}
+\bibliographystyle{abbrvnat}
+\usepackage{pstricks}
+\usepackage{color}
+
+\input{math_notation}
+
+\title{Variational Inference for the PLDS}
+\author{Lars Buesing}
+\date{\today}
+
+\newtheorem{myfact}{Fact}
+\newtheorem{myobs}{Observation}
+\newtheorem{mydef}{Definition}
+\newtheorem{mythm}{Theorem}
+\newtheorem{mylem}{Lemma}
+\newtheorem{myprob}{Problem}
+\newtheorem{mycol}{Corollary}
+
+  
+
+\begin{document}
+\maketitle
+
+\section{Model}
+
+\begin{eqnarray}
+ p(\xb)				&=&	\Normal(\xb\vert \mu,\Sigma)\\
+ p(\yb\vert \xb)		&=&	\prod_{n}	p(y_n\vert \eta_n), \ \ \ \ \eta:=W\xb+\overline{\db}
+\end{eqnarray}
+For latent dynamical system we know that $\Lambda:=\Sigma^{-1}$ is tri-diagonal, and $W$ block-diagonal:
+\begin{eqnarray}
+ \Lambda	&=&	\begin{pmatrix} Q_0^{-1}+AQ^{-1}A^\top	&	A^\top Q^{-1}		& \\
+					Q^{-1}A			&	Q^{-1}+AQ^{-1}A^\top 	&  A^\top Q^{-1}\\
+								&	\ddots			& \ddots		& \ddots
+        	   	\end{pmatrix}\\
+ W		&=&	\operatorname{blk-diag}(\underbrace{C,\ldots,C}_{T\mbox{-times}})
+\end{eqnarray}
+
+
+
+\section{Inference problem}
+
+Gaussian variational approximation:
+\begin{eqnarray}
+ q(\xb)				&=&	\Normal(\xb\vert\mb,V)
+\end{eqnarray}
+Variational lower bound:
+\begin{eqnarray}
+ \mathcal L(\mb,V)		&\leq& \log p(\yb)\\
+ \mathcal L(\mb,V)		&=&	\frac{1}{2}\left(\log\vert V\vert-\tr[\Sigma^{-1}V]-(\mb-\mu)^\top \Sigma^{-1}(\mb-\mu)     \right)
+					+\sum_{n} \E_{q(\xb)}[\log p(y_n\vert \eta_n)]
+\end{eqnarray}
+For Poisson with exp link function we can compute $\E_{q(\xb)}[\log p(y_n\vert \eta_n)]$, otherwise (eg for Bernoulli observations) use a local variational lower bound on the integrated likelihood:
+\begin{eqnarray}
+ \E_{q(\xb)}[\log p(y_n\vert \eta_n)]	&\geq& 	-f_n(\overline m_n,\overline v_n)\\
+ f_n(\overline m_n,\overline v_n)	&=&	-y_n\overline m_n+\exp(\overline m_n+\overline v_n/2)\\
+ \overline \mb				&:=&	W\mb+\overline\db\\
+ \overline{ \mathbf{v}}			&:=&	\diag(WVW^\top)
+\end{eqnarray}
+The bound then reads:
+\begin{eqnarray}
+ \mathcal L(\mb,V)	&=&	\frac{1}{2}\left(\log\vert V\vert-\tr[\Sigma^{-1}V]-(\mb-\mu)^\top \Sigma^{-1}(\mb-\mu)     \right)
+				-\sum_{n} f_n(\overline m_n,\overline v_n)
+%\\			&=&	\frac{1}{2}\left(\log\vert V\vert-\tr[\Sigma^{-1}V]-\Vert\mb-\mu\Vert^2_{\Sigma^{-1}}    \right)-\sum_{n} f_n(\overline m_n,\overline v_n)
+\end{eqnarray}
+For convex $f_n$ (true for exp-PLDS): strictly concave optimization in $\mb,V$\\
+Possible optimization strategies:
+\begin{enumerate}
+ \item Direct optimization over $\mb,V$: strictly concave, however $V$ dense; does not make use of Markovian structure of the model 
+ \item Optimization over $\mb,V^{-1}$: Opper et al show that optimal $V^\ast=(\Sigma^{-1}+W^\top \diag(\lambda)W)^{-1}$; hence for tri-diagonal $\Sigma^{-1}$ and block-diagonal $W$ then
+       $V^\ast$ is also tri-diagonal; however optimization over $\mb,\lambda$ is not convex and converges slowly according to [Seeger et al. ICML2013]
+ \item Solve the dual optimization as proposed in [Seeger et al. ICML2013]: convex, makes use of Markovian structure of the model 
+\end{enumerate}
+
+
+\section{Variational inference via dual optimization}
+\subsection{Optimization to solve}
+Dual problem:
+\begin{eqnarray}
+ \min_{\lambda}		&&	\frac{1}{2} (\lambda-\yb)^\top W\Sigma W^\top(\lambda-\yb)-(W\mu+\overline{\db})^\top(\lambda-\yb)-\frac{1}{2}\log\vert A_\lambda\vert+\sum_nf^\ast(\lambda_n)\\
+ \mbox{subject to}	&&	\lambda_i>0 \nonumber
+\end{eqnarray}
+where 
+\begin{eqnarray}
+ f^\ast(\lambda_i)	&:=&		\lambda_i(\log\lambda_i-1)\\
+ A_\lambda		&:=&		\Sigma^{-1}+W^\top \diag(\lambda)W
+\end{eqnarray}
+The optimal variational parameters for $q(\xb)=\Normal(\xb\vert\mb^\ast,V^\ast)$ are given by:
+\begin{eqnarray}
+ \mb^\ast		&=&		\mu-\Sigma W^\top(\lambda^\ast-\yb)\\
+ V^\ast			&=&		(\Sigma^{-1}+W^\top \diag(\lambda^\ast)W)^{-1}=A_{\lambda^\ast}^{-1}
+\end{eqnarray}
+\subsection{How to optimize?}
+Use gradient based methods:
+\begin{eqnarray*}
+ \nabla_\lambda		&=&		W\Sigma W^\top (\lambda-\yb)-W\mu-\overline{\db}+\log\lambda-\frac{1}{2}\diag(WA^{-1}_\lambda W^\top)\\
+			&=&		\underbrace{W\Sigma W \lambda}_{O(N)}+\underbrace{\log\lambda}_{O(N)}-\frac{1}{2}\diag(\underbrace{WA^{-1}_\lambda W^\top}_{O(N)})-\underbrace{W(\Sigma W^\top\yb+\mu)}_{\mbox{pre-compute}}
+\end{eqnarray*}
+Hessian:
+\begin{eqnarray*}
+ H_\lambda		&=&		\diag(\lambda)^{-1}+W\Sigma W^\top + (WA^{-1}_\lambda W^\top)\circ(WA^{-1}_\lambda W^\top)
+\end{eqnarray*}
+Iterate:
+\begin{eqnarray*}
+ \mb^k			&=&		\mu+\Sigma W^\top\yb-\Sigma W^\top\lambda^k\\
+ A^k			&=&		\Sigma^{-1}+W^\top \diag(\lambda^k)W\\
+ \nabla^k		&=&		\log\lambda^k-W\mb^k-\overline{\db}-\frac{1}{2}\diag(W(A^k)^{-1}W^\top)\\
+ \lambda^{k+1}		&=&		\lambda^{k}-\nu \nabla^k
+\end{eqnarray*}
+Computing the block-diagonal elements of $A^k$ is equivalent to Kalman smoothing and requires a forward-backward pass through the data which costs $O(Td^3)$.\\
+What's the relation to Laplace approximation?
+\begin{eqnarray*}
+ \nabla^k		&=&		-\Sigma^{-1}(\xb-\mu)+W^\top(\yb-\exp(W\xb+\overline{\db})) \\
+ H^k			&=&		-(\Sigma^{-1}+W^\top \diag(\exp(W\xb+\overline{\db}))W)
+\end{eqnarray*}
+
+
+\subsection{Kalman smoothing}
+The matrix $A_\lambda$ equals exactly the precision matrix of a LDS with dynamics given by $A,Q$ and observations sampled from $\Normal(C\xb_t,\diag(\lambda_t))$.
+Hence, calculating the block-diagonal of $A^{-1}_\lambda$ is exactly equivalent to calculating the smoothed posterior covariance of this LDS.
+Let $P_{t\vert t}$ denote the filtered covariance, $P_{t+1\vert t}$ the one-step-ahead covariance and $P_{t\vert T}$ the smoothed covariance of this model.
+\begin{eqnarray}
+ (A^{-1}_\lambda)_{(t-1)d+1:td,(t-1)d+1:td}	&\stackrel{!}{=}&	P_{t\vert T}
+\end{eqnarray}
+We use the Kalman smoother recursions. The forward pass reads:
+\begin{eqnarray}
+ P_{t+1\vert t}		&=&	AP_{t\vert t}A^\top+Q\\
+ P_{t+1\vert t+1}	&=&	\(P_{t+1\vert t}^{-1}+C^\top\diag(\lambda_t)C\)^{-1}\\
+			&=&	\(I+P_{t+1\vert t}C^\top\diag(\lambda_t)C\)\backslash P_{t+1\vert t}\\
+ P_{0\vert 0}		&=&	Q_0
+\end{eqnarray}
+The backward pass is given by:
+\begin{eqnarray}
+ C_t			&=&	P_{t\vert t}A^\top/P_{t+1\vert t}\\
+ P_{t\vert T}		&=&	P_{t\vert t}+C_t\( P_{t+1\vert T}- P_{t+1\vert t}\)C_t^\top
+\end{eqnarray}
+The initialization for the backward pass $P_{T\vert T}$ is calculated the last step of the forward pass.
+
+
+
+
+\clearpage
+\section{Appendix}
+\subsection{Derivation of dual optimization}
+Original primal problem:
+\begin{eqnarray*}
+\max_{\mb,V}	&	\frac{1}{2}\left(\log\vert V\vert-\tr[\Sigma^{-1}V]-\Vert\mb-\mu\Vert^2_{\Sigma^{-1}}    \right)-\sum_{n} f_n(\overline m_n,\overline v_n)\\
+\mbox{s.t.}	&	V\in S^{++}
+\end{eqnarray*}
+Expanded primal problem:
+\begin{eqnarray*}
+ \begin{array}{ll} 	\argmax_{\mb,V,\rho,h}	&	\frac{1}{2}\left(\log\vert V\vert-\tr[\Sigma^{-1}V]-\Vert\mb-\mu\Vert^2_{\Sigma^{-1}}    \right)-\sum_{n} f_n(h_n,\rho_n)\\
+			\mbox{s.t.}		&	V\in S^{++}\\
+						&	h=W\mb+\overline{\db}\\
+						&	\rho=\diag(WVW^\top)
+ \end{array}
+\end{eqnarray*}
+Lagrangian:
+\begin{eqnarray*}
+  \mathcal L(\mb,V,h,\rho,\alpha,\lambda)	&:=&	\frac{1}{2}\left(\log\vert V\vert-\tr[\Sigma^{-1}V]-\Vert\mb-\mu\Vert^2_{\Sigma^{-1}}    \right)-\sum_{n} f_n(h_n,\rho_n)\\
+						&&	+\alpha^\top(h-W\mb+\overline{\db})+\frac{1}{2}\lambda^\top(\rho-\diag(WVW^\top))
+\end{eqnarray*}
+Dual
+\begin{eqnarray*}
+ D(\alpha,\lambda)				&:=&	\min_{\mb,V,h,\rho}L(\mb,V,h,\rho,\alpha,\lambda)\\
+ V^\ast						&=&	(\Sigma^{-1}+W^\top \diag(\lambda)W)^{-1}=:A_\lambda^{-1}\\
+\mb^\ast					&=&	\mu-\Sigma W^\top\alpha\\
+\alpha						&=&	\lambda-y
+\end{eqnarray*}
+Final reduced dual problem:
+\begin{eqnarray*}
+ \begin{array}{ll} 	\argmin_{\lambda}	&	\frac{1}{2} (\lambda-\yb)^\top W\Sigma W(\lambda-\yb)-(\overline\db+W\mu)^\top(\lambda-\yb)-\frac{1}{2}\log\vert A_\lambda\vert+\sum_nf^\ast(\lambda_n)\\
+			\mbox{s.t.}		&	\lambda_i>0
+ \end{array}
+\end{eqnarray*}
+
+
+\subsection{Duality basics}
+Primal problem with optimal values $p^\ast$:
+\begin{eqnarray*}
+ \begin{array}{ll} 	\mbox{min}	&	f(x)\\
+			\mbox{s.t.}	&	f_i(x)\leq 0\\
+					&	h_i(x)=0
+ \end{array}
+\end{eqnarray*}
+Lagrange function with $\lambda_i\geq0$:
+\begin{eqnarray*}
+ L(x,\lambda,\nu)	&:=&	f(x)+\sum_{i}\lambda_if_i(x)+\sum_i\nu_ih_i(x)
+\end{eqnarray*}
+Dual:
+\begin{eqnarray*}
+ g(\lambda,\nu)	&:=&	\inf_x L(x,\lambda,\nu)
+\end{eqnarray*}
+Dual is a lower bound:
+\begin{eqnarray*}
+ g(\lambda,\nu)	&\leq&	p^\ast
+\end{eqnarray*}
+This can be shown by bounding the constraint functions with linear functions from below.
+Dual problem:
+\begin{eqnarray*}
+ \begin{array}{ll} 	\mbox{min}	&	-g(\lambda,\nu)\\
+			\mbox{s.t.}	&	\lambda_i\geq 0
+ \end{array}
+\end{eqnarray*}
+Dual is always convex!
+\paragraph{Slater's conditions}
+We have stong duality iff:
+\begin{eqnarray*}
+ g(\lambda,\nu)	&=&	p^\ast
+\end{eqnarray*}
+A sufficient condition for strong duality is: $f$ convex, no inequality constraints, primal feasible
+
+\paragraph{Dual function}
+The dual $f^\ast$ of a function $f$ is defined as:
+\begin{eqnarray*}
+ f^\ast(y)	&:=&	\sup_x \   y^\top x - f(x)
+\end{eqnarray*}
+
+
+
+\end{document}

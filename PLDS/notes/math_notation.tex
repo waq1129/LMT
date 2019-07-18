@@ -1,0 +1,91 @@
+\newcommand{\Fig}{Fig.\ }
+\newcommand{\bs}{\backslash}
+\renewcommand{\(}{\left(}
+\renewcommand{\)}{\right)}
+\newcommand{\la}{\left\langle}
+\newcommand{\ra}{\right\rangle}
+
+% operators
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\I}{\mathbb{I}}
+\newcommand{\E}{\mathbb{E}}
+
+\newcommand{\Normal}{\mathcal{N}}
+%\newcommand{\Poisson}{\mathcal{P}}  %Poisson likelihood
+\newcommand{\Poisson}{\operatorname{Poisson}}  %Poisson likelihood
+\newcommand{\GLM}{\operatorname{GLM}}
+\newcommand{\Bernoulli}{\operatorname{Bernoulli}}
+
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\vvec}{\operatornam{vec}}
+\newcommand{\abs}{\operatorname{abs}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\myvec}{\operatorname{vec}}
+\newcommand{\logdet}{\operatorname{logdet}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\argmax}{\operatorname{argmax}}
+\newcommand{\argmin}{\operatorname{argmin}}
+\newcommand{\compi}{\mathbf{i}}
+
+
+% bold characters
+\newcommand{\xb}{\mathbf{x}}  %x latent state GP
+\newcommand{\zb}{\mathbf{z}} 
+\newcommand{\rb}{\mathbf{r}} 
+\newcommand{\Wb}{\mathbf{W}} 
+\newcommand{\ab}{\mathbf{a}} 
+\newcommand{\mb}{\mathbf{m}} 
+\newcommand{\bb}{\mathbf{b}}
+\newcommand{\ub}{\mathbf{u}}
+\newcommand{\yb}{\mathbf{y}}  %y observed spike counts
+\newcommand{\db}{\mathbf{d}} %d strung out 
+\newcommand{\wb}{\mathbf{w}} %d strung out 
+\newcommand{\mub}{\bm{\mu}}
+\newcommand{\hb}{\mathbf{h}}
+\newcommand{\vb}{\mathbf{v}}
+  
+
+% SSID stuff
+\newcommand{\ybf}{\yb^{+}}
+\newcommand{\ybp}{\yb^{-}}
+\newcommand{\ybfp}{\yb^{\pm}}
+\newcommand{\yfp}{y^{\pm}}
+\newcommand{\zbf}{\zb^{+}}
+\newcommand{\zbp}{\zb^{-}}
+\newcommand{\zbfp}{\zb^{\pm}}
+\newcommand{\zfp}{z^{\pm}}
+
+
+% Matrices
+\newenvironment{Mat}[1][0]
+{ \left(\begin{array}{#1}}  
+{ \end{array}\right) }
+
+
+% References on the bottom of the page
+\usepackage[absolute,overlay]{textpos} 
+\newenvironment{reference}[2]{% 
+\begin{textblock*}{\textwidth}(#1,#2) 
+      \footnotesize\bgroup\color{black}}{\egroup\end{textblock*}}
+
+
+
+% Itemization with larger spaces
+\newenvironment{myit}[1][0]
+{ \begin{itemize}
+  \setlength{\itemsep}{5pt}
+  \setlength{\parskip}{5pt}
+  \setlength{\parsep}{0pt}}
+{ \end{itemize} }
+
+
+
+% Vertically & horizontally centered tabular entrie
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+

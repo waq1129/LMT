@@ -1,0 +1,7 @@
+function fx = stableLogExp(x)
+
+fx = zeros(size(x));
+
+fx(x>5)          = x(x>5);
+fx(x<(-5))       = exp(x(x<(-5)));
+fx(abs(x)<=5)    = log(1+exp(x(abs(x)<=5)));
